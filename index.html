@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Civilizational Pathways — World Map Dashboard Simulator (1900–2500)</title>
+  <meta name="description" content="Interactive world map simulator tracking civilizational pathways from 1900 to 2500: development convergence, polycrisis mitigation, and managed demographic contraction.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- D3 + TopoJSON -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://unpkg.com/topojson-client@3"></script>
+</head>
+<body>
+
+  <!-- ════════════════ HEADER BAR ════════════════ -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="title">Civilizational Pathways</h1>
+      <span class="subtitle">1900 – 2500 · World Map Dashboard Simulator</span>
+    </div>
+    <div class="header-right">
+      <div class="kpi-card">
+        <span class="kpi-label">Year</span>
+        <span class="kpi-value" id="kpi-year">2025</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Population</span>
+        <span class="kpi-value" id="kpi-pop">8.1B</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Global TFR</span>
+        <span class="kpi-value" id="kpi-tfr">2.31</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Scivilization</span>
+        <span class="kpi-value" id="kpi-sciv">0.42</span>
+      </div>
+      <div class="kpi-card kpi-warn">
+        <span class="kpi-label">Wet-Bulb Risk</span>
+        <span class="kpi-value" id="kpi-wb">18%</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ════════════════ MAIN DASHBOARD ════════════════ -->
+  <div class="dashboard">
+    <!-- LEFT: World Map -->
+    <div class="map-container" id="map-container">
+      <div class="map-header">
+        <div class="metric-selector">
+          <button class="metric-btn active" data-metric="devIndex">Development</button>
+          <button class="metric-btn" data-metric="population">Population</button>
+          <button class="metric-btn" data-metric="wetbulbRisk">Wet-Bulb Risk</button>
+          <button class="metric-btn" data-metric="toxicity">Toxicity</button>
+          <button class="metric-btn" data-metric="fossilPct">Fossil Energy</button>
+          <button class="metric-btn" data-metric="urbanPct">Urbanization</button>
+        </div>
+      </div>
+      <div class="map-stage">
+        <svg id="map-svg"></svg>
+        <div class="map-tooltip" id="map-tooltip"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Chart Panels -->
+    <div class="panels">
+      <!-- Panel A: Population & Demographics -->
+      <div class="panel" id="panel-population">
+        <div class="panel-header">
+          <h3>Population & Demographics</h3>
+          <span class="panel-badge">Panel A</span>
+        </div>
+        <div class="panel-body">
+          <svg id="chart-population"></svg>
+        </div>
+      </div>
+
+      <!-- Panel B: Energy & Development -->
+      <div class="panel" id="panel-energy">
+        <div class="panel-header">
+          <h3>Energy Transition & Development</h3>
+          <span class="panel-badge">Panel B</span>
+        </div>
+        <div class="panel-body">
+          <svg id="chart-energy"></svg>
+        </div>
+      </div>
+
+      <!-- Panel C: Polycrisis Stress -->
+      <div class="panel" id="panel-polycrisis">
+        <div class="panel-header">
+          <h3>Polycrisis Stress Indicators</h3>
+          <span class="panel-badge">Panel C</span>
+        </div>
+        <div class="panel-body">
+          <svg id="chart-polycrisis"></svg>
+        </div>
+      </div>
+
+      <!-- Panel D: Scivilization Score -->
+      <div class="panel" id="panel-scivilization">
+        <div class="panel-header">
+          <h3>Civilizational Sustainability (S<sub>civ</sub>)</h3>
+          <span class="panel-badge">Panel D</span>
+        </div>
+        <div class="panel-body">
+          <svg id="chart-scivilization"></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ TIMELINE ════════════════ -->
+  <footer class="timeline-bar">
+    <div class="timeline-controls">
+      <button class="tl-btn" id="tl-step-back-100" title="-100 years">◄◄</button>
+      <button class="tl-btn" id="tl-step-back-10" title="-10 years">◄</button>
+      <button class="tl-btn tl-play" id="tl-play" title="Play/Pause">▶</button>
+      <button class="tl-btn" id="tl-step-fwd-10" title="+10 years">►</button>
+      <button class="tl-btn" id="tl-step-fwd-100" title="+100 years">►►</button>
+      <select class="tl-speed" id="tl-speed">
+        <option value="50">0.5×</option>
+        <option value="100" selected>1×</option>
+        <option value="200">2×</option>
+        <option value="500">5×</option>
+        <option value="1000">10×</option>
+      </select>
+    </div>
+    <div class="timeline-track" id="timeline-track">
+      <svg id="timeline-svg"></svg>
+    </div>
+    <div class="phase-indicator">
+      <span id="phase-label">Pre-Transition</span>
+      <div class="phase-bar" id="phase-bar"></div>
+    </div>
+  </footer>
+
+  <!-- ════════════════ SCRIPTS ════════════════ -->
+  <script src="js/simulation.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
