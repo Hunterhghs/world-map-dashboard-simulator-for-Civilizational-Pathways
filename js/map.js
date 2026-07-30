@@ -137,8 +137,8 @@ const WorldMap = (() => {
   const countryToRegion = Simulation.getCountryToRegion();
 
   function getCountryColor(feature, year) {
-    const iso = feature.properties?.ISO_A3 || feature.properties?.iso_a3 || '';
-    const region = countryToRegion[iso];
+    const name = feature.properties?.name || '';
+    const region = countryToRegion[name];
     if (!region) return '#0a1018'; // unassigned: very dark
 
     const value = Simulation.getRegionalValue(region, currentMetric, year);
@@ -148,9 +148,8 @@ const WorldMap = (() => {
   }
 
   function getCountryInfo(feature) {
-    const iso = feature.properties?.ISO_A3 || feature.properties?.iso_a3 || '';
-    const name = feature.properties?.ADMIN || feature.properties?.name || iso || 'Unknown';
-    const region = countryToRegion[iso];
+    const name = feature.properties?.name || 'Unknown';
+    const region = countryToRegion[name];
     if (!region) return { name, region: 'Unassigned', value: 0 };
 
     const value = Simulation.getRegionalValue(region, currentMetric, currentYear);
@@ -194,7 +193,7 @@ const WorldMap = (() => {
     const info = getCountryInfo(d);
     // Dispatch custom event for other panels
     window.dispatchEvent(new CustomEvent('countrySelected', {
-      detail: { country: info.name, region: info.region, iso: d.properties?.ISO_A3 }
+      detail: { country: info.name, region: info.region }
     }));
   }
 

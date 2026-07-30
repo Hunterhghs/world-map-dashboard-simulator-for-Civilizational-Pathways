@@ -30,18 +30,23 @@ const Simulation = (() => {
   // Warming scenario
   const WARMING_BY_2100 = 3.5; // °C above pre-industrial (unmitigated reference)
 
-  // ── Region definitions (UN geoscheme, simplified) ─────────────────────
+  // ── Region definitions — country names match TopoJSON properties.name ──
   const REGIONS = {
     'North America': {
-      countries: ['USA', 'CAN', 'MEX', 'GTM', 'HND', 'SLV', 'NIC', 'CRI', 'PAN', 'BLZ'],
+      countries: ['Canada', 'United States of America', 'Mexico', 'Guatemala', 'Honduras',
+                  'El Salvador', 'Nicaragua', 'Costa Rica', 'Panama', 'Belize',
+                  'Bahamas', 'Cuba', 'Jamaica', 'Haiti', 'Dominican Rep.',
+                  'Puerto Rico', 'Greenland', 'Trinidad and Tobago'],
       latRange: [15, 70],
-      basePop2025: 0.60,      // billion
+      basePop2025: 0.60,
       baseTFR2025: 1.7,
-      devIndex2025: 0.88,     // 0-1 development convergence
+      devIndex2025: 0.88,
       fossilPct2025: 0.62
     },
     'South America': {
-      countries: ['BRA', 'ARG', 'COL', 'PER', 'VEN', 'CHL', 'ECU', 'BOL', 'PRY', 'URY', 'GUY', 'SUR'],
+      countries: ['Brazil', 'Argentina', 'Colombia', 'Peru', 'Venezuela', 'Chile',
+                  'Ecuador', 'Bolivia', 'Paraguay', 'Uruguay', 'Guyana', 'Suriname',
+                  'Falkland Is.'],
       latRange: [-55, 12],
       basePop2025: 0.44,
       baseTFR2025: 1.9,
@@ -49,8 +54,13 @@ const Simulation = (() => {
       fossilPct2025: 0.55
     },
     'Europe': {
-      countries: ['GBR', 'FRA', 'DEU', 'ITA', 'ESP', 'POL', 'NLD', 'BEL', 'SWE', 'NOR', 'FIN', 'DNK',
-                  'AUT', 'CHE', 'PRT', 'GRC', 'IRL', 'CZE', 'HUN', 'ROU', 'UKR', 'BGR', 'SRB', 'HRV'],
+      countries: ['United Kingdom', 'France', 'Germany', 'Italy', 'Spain', 'Poland',
+                  'Netherlands', 'Belgium', 'Sweden', 'Norway', 'Finland', 'Denmark',
+                  'Austria', 'Switzerland', 'Portugal', 'Greece', 'Ireland', 'Czechia',
+                  'Hungary', 'Romania', 'Ukraine', 'Bulgaria', 'Serbia', 'Croatia',
+                  'Slovakia', 'Slovenia', 'Lithuania', 'Latvia', 'Estonia',
+                  'Bosnia and Herz.', 'Macedonia', 'Montenegro', 'Albania', 'Kosovo',
+                  'Luxembourg', 'Iceland', 'Cyprus', 'Moldova', 'N. Cyprus'],
       latRange: [36, 70],
       basePop2025: 0.74,
       baseTFR2025: 1.5,
@@ -58,7 +68,8 @@ const Simulation = (() => {
       fossilPct2025: 0.48
     },
     'Russia & Central Asia': {
-      countries: ['RUS', 'KAZ', 'UZB', 'TKM', 'KGZ', 'TJK', 'MNG', 'BLR', 'MDA', 'GEO', 'ARM', 'AZE'],
+      countries: ['Russia', 'Kazakhstan', 'Uzbekistan', 'Turkmenistan', 'Kyrgyzstan',
+                  'Tajikistan', 'Mongolia', 'Belarus', 'Georgia', 'Armenia', 'Azerbaijan'],
       latRange: [35, 75],
       basePop2025: 0.24,
       baseTFR2025: 1.8,
@@ -66,8 +77,10 @@ const Simulation = (() => {
       fossilPct2025: 0.70
     },
     'North Africa & Middle East': {
-      countries: ['EGY', 'DZA', 'MAR', 'TUN', 'LBY', 'SDN', 'SAU', 'IRN', 'IRQ', 'SYR', 'JOR', 'ISR',
-                  'ARE', 'QAT', 'KWT', 'OMN', 'YEM', 'LBN', 'TUR'],
+      countries: ['Egypt', 'Algeria', 'Morocco', 'Tunisia', 'Libya', 'Sudan',
+                  'Saudi Arabia', 'Iran', 'Iraq', 'Syria', 'Jordan', 'Israel',
+                  'United Arab Emirates', 'Qatar', 'Kuwait', 'Oman', 'Yemen',
+                  'Lebanon', 'Turkey', 'W. Sahara', 'Palestine', 'Mauritania'],
       latRange: [12, 42],
       basePop2025: 0.58,
       baseTFR2025: 2.6,
@@ -75,8 +88,14 @@ const Simulation = (() => {
       fossilPct2025: 0.82
     },
     'Sub-Saharan Africa': {
-      countries: ['NGA', 'ETH', 'COD', 'ZAF', 'TZA', 'KEN', 'UGA', 'GHA', 'MOZ', 'AGO', 'CIV', 'CMR',
-                  'MDG', 'NER', 'BFA', 'MLI', 'MWI', 'ZMB', 'SEN', 'TCD', 'SOM', 'ZWE', 'RWA', 'BDI'],
+      countries: ['Nigeria', 'Ethiopia', 'Dem. Rep. Congo', 'South Africa', 'Tanzania',
+                  'Kenya', 'Uganda', 'Ghana', 'Mozambique', 'Angola', "Côte d'Ivoire",
+                  'Cameroon', 'Madagascar', 'Niger', 'Burkina Faso', 'Mali', 'Malawi',
+                  'Zambia', 'Senegal', 'Chad', 'Somalia', 'Zimbabwe', 'Rwanda', 'Burundi',
+                  'S. Sudan', 'Benin', 'Togo', 'Sierra Leone', 'Liberia', 'Guinea',
+                  'Guinea-Bissau', 'Gambia', 'Eritrea', 'Djibouti', 'Botswana',
+                  'Namibia', 'Lesotho', 'Gabon', 'Congo', 'Eq. Guinea', 'Central African Rep.',
+                  'Somaliland', 'eSwatini'],
       latRange: [-35, 15],
       basePop2025: 1.22,
       baseTFR2025: 4.4,
@@ -84,7 +103,7 @@ const Simulation = (() => {
       fossilPct2025: 0.45
     },
     'South Asia': {
-      countries: ['IND', 'PAK', 'BGD', 'NPL', 'LKA', 'AFG', 'BTN'],
+      countries: ['India', 'Pakistan', 'Bangladesh', 'Nepal', 'Sri Lanka', 'Afghanistan', 'Bhutan'],
       latRange: [5, 37],
       basePop2025: 1.94,
       baseTFR2025: 2.1,
@@ -92,7 +111,7 @@ const Simulation = (() => {
       fossilPct2025: 0.68
     },
     'East Asia': {
-      countries: ['CHN', 'JPN', 'KOR', 'PRK', 'TWN'],
+      countries: ['China', 'Japan', 'South Korea', 'North Korea', 'Taiwan'],
       latRange: [20, 50],
       basePop2025: 1.64,
       baseTFR2025: 1.2,
@@ -100,7 +119,10 @@ const Simulation = (() => {
       fossilPct2025: 0.65
     },
     'Southeast Asia & Oceania': {
-      countries: ['IDN', 'PHL', 'VNM', 'THA', 'MMR', 'MYS', 'AUS', 'NZL', 'PNG', 'KHM', 'LAO', 'SGP'],
+      countries: ['Indonesia', 'Philippines', 'Vietnam', 'Thailand', 'Myanmar',
+                  'Malaysia', 'Australia', 'New Zealand', 'Papua New Guinea',
+                  'Cambodia', 'Laos', 'Brunei', 'Timor-Leste',
+                  'Solomon Is.', 'Fiji', 'Vanuatu', 'New Caledonia'],
       latRange: [-40, 23],
       basePop2025: 0.75,
       baseTFR2025: 2.0,
