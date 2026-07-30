@@ -354,23 +354,25 @@ const Simulation = (() => {
       out.fossilPct[y] = clamp(fossil, 0.03, 0.95);
 
       // ── Toxicity Loading ─────────────────────────────────────────────
-      // Peaks during industrial era, declines with clean transition + depopulation
+      // Scales by fossil fuel dependency (higher fossil = more pollution)
+      // and development level (more industrial legacy = higher accumulated load)
+      const toxBase = 0.35 + 0.40 * fossilPct2025 + 0.25 * devIndex2025;
       let tox;
       if (year <= 1950) {
-        tox = lerp(0.05, 0.20, (year - 1900) / 50);
+        tox = lerp(0.03, 0.15 * toxBase, (year - 1900) / 50);
       } else if (year <= 2025) {
-        tox = lerp(0.20, 0.70, (year - 1950) / 75);
+        tox = lerp(0.15 * toxBase, toxBase, (year - 1950) / 75);
       } else if (year <= 2075) {
         // Peak toxicity as legacy + new loading compete with mitigation
         const t = (year - 2025) / 50;
-        tox = lerp(0.70, 0.95, t) * (1 - 0.2 * t); // peak around 2050
-        tox = 0.70 + 0.25 * Math.sin(t * Math.PI); // bell curve: 0.70→0.95→0.70
+        const peak = toxBase * 1.25;
+        tox = toxBase + (peak - toxBase) * Math.sin(t * Math.PI); // bell curve
       } else if (year <= 2200) {
         const t = (year - 2075) / 125;
-        tox = lerp(0.70, 0.25, smoothstep(t));
+        tox = lerp(toxBase, 0.20, smoothstep(t));
       } else {
         const t = (year - 2200) / 300;
-        tox = lerp(0.25, 0.08, smoothstep(t));
+        tox = lerp(0.20, 0.06, smoothstep(t));
       }
       out.toxicity[y] = clamp(tox, 0.01, 1.0);
 
@@ -397,17 +399,20 @@ const Simulation = (() => {
       out.wetbulbRisk[y] = clamp(wbRisk, 0.005, 0.95);
 
       // ── Urbanization ─────────────────────────────────────────────────
+      // Scales by development index: more developed = more urbanized
+      const urbanBase = 0.20 + devIndex2025 * 0.70; // range: ~0.46–0.84
       let urban;
       if (year <= 2025) {
-        urban = lerp(0.10, 0.56, smoothstep((year - 1900) / 125));
+        urban = lerp(0.06, urbanBase, smoothstep((year - 1900) / 125));
       } else if (year <= 2100) {
-        // Managed urban consolidation
-        urban = lerp(0.56, 0.82, smoothstep((year - 2025) / 75));
+        // Managed urban consolidation — converges toward high urbanization
+        const t = (year - 2025) / 75;
+        urban = lerp(urbanBase, 0.88, smoothstep(t));
       } else {
         // Ultra-urban enclave model
-        urban = lerp(0.82, 0.92, smoothstep((year - 2100) / 400));
+        urban = lerp(0.88, 0.94, smoothstep((year - 2100) / 400));
       }
-      out.urbanPct[y] = clamp(urban, 0.05, 0.95);
+      out.urbanPct[y] = clamp(urban, 0.03, 0.96);
     }
   }
 
