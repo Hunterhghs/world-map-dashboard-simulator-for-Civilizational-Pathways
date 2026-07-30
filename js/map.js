@@ -16,12 +16,12 @@ const WorldMap = (() => {
   // ── Color scales per metric ────────────────────────────────────────────
 
   const COLOR_SCHEMES = {
-    devIndex: ['#0d1b2a', '#1b3a4b', '#1b7a5e', '#2dd4bf', '#ccfbf1'],
-    population: ['#0d1b2a', '#2d1b3a', '#7a1b5e', '#f472b6', '#fce7f3'],
-    wetbulbRisk: ['#0d1b2a', '#3a1b0d', '#c2410c', '#f87171', '#fecaca'],
-    toxicity: ['#0d1b2a', '#3a2d0d', '#b45309', '#fb923c', '#fed7aa'],
-    fossilPct: ['#0d1b2a', '#3a1b1b', '#b91c1c', '#f87171', '#fee2e2'],
-    urbanPct: ['#0d1b2a', '#1b2d3a', '#1e40af', '#60a5fa', '#dbeafe']
+    devIndex: ['#0f2d3d', '#155e4a', '#0f766e', '#2dd4bf', '#ccfbf1'],
+    population: ['#1e1830', '#4e2250', '#9d174d', '#f472b6', '#fce7f3'],
+    wetbulbRisk: ['#1a1414', '#45150c', '#b91c1c', '#f87171', '#fecaca'],
+    toxicity: ['#1a1810', '#45250c', '#c2410c', '#fb923c', '#fed7aa'],
+    fossilPct: ['#1a1010', '#451818', '#b91c1c', '#f87171', '#fee2e2'],
+    urbanPct: ['#0f2038', '#153060', '#2563eb', '#60a5fa', '#dbeafe']
   };
 
   const METRIC_LABELS = {
@@ -120,16 +120,14 @@ const WorldMap = (() => {
 
   function updateColorScale() {
     const sim = Simulation.getData();
-    // Compute range for current metric
     let values = [];
     for (const region of Simulation.getRegionNames()) {
       values.push(Simulation.getRegionalValue(region, currentMetric, currentYear));
     }
-    const domain = [d3.min(values) || 0, d3.max(values) || 1];
-    colorScale = d3.scaleLinear()
-      .domain(d3.range(domain[0], domain[1], (domain[1] - domain[0]) / 4))
-      .range(COLOR_SCHEMES[currentMetric] || COLOR_SCHEMES.devIndex)
-      .interpolate(d3.interpolateRgb);
+    const colors = COLOR_SCHEMES[currentMetric] || COLOR_SCHEMES.devIndex;
+    colorScale = d3.scaleQuantize()
+      .domain([d3.min(values) || 0, d3.max(values) || 1])
+      .range(colors);
   }
 
   // ── Country → region → value lookup ────────────────────────────────────
